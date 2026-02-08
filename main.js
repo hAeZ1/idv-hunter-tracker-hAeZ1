@@ -40,12 +40,12 @@ let state = {
     ui: UI_MODE.IDLE,
     phase: PHASES.A,
     gameStartedAt: null,
-    firstTraitMaxStartAt: null,
-    activeTraitId: null,
+    firstTraitId: null,
+    secondTraitId: null,
     matchTime: 0,
 
     traits: {},
-    eco: {}, // Timers for burning, arrogance, decode...
+    eco: {},
 
     startBtnTs: 0,
     restartCountdown: 0
@@ -74,8 +74,8 @@ function resetTool() {
     state.ui = UI_MODE.IDLE;
     state.phase = PHASES.A;
     state.gameStartedAt = null;
-    state.firstTraitMaxStartAt = null;
-    state.activeTraitId = null;
+    state.firstTraitId = null;
+    state.secondTraitId = null;
     state.matchTime = 0;
     setupData();
     updateUIColors();
@@ -207,19 +207,19 @@ function handleTraitClick(id) {
     const now = performance.now();
     const trait = state.traits[id];
 
-    // PHASE A: Only start if initial CT is 0
+    // PHASE A: Start 1st Trait
     if (state.phase === PHASES.A) {
         if (trait.status === 'initial' && trait.remaining <= 0) {
+            state.firstTraitId = id;
             startMaxCT(id, now);
             state.phase = PHASES.B;
         }
         return;
     }
 
-    // PHASE B: Absolutely Locked.
+    // PHASE B: Locked to 1st Trait only.
     if (state.phase === PHASES.B) {
-        // Can only restart self if 0
-        if (state.activeTraitId === id && trait.remaining <= 0) {
+        if (state.firstTraitId === id && trait.remaining <= 0) {
             startMaxCT(id, now);
         }
         return;
@@ -227,18 +227,20 @@ function handleTraitClick(id) {
 
     // PHASE C: Trump Available!
     if (state.phase === PHASES.C) {
-        if (state.activeTraitId === id) {
+        if (state.firstTraitId === id) {
             if (trait.remaining <= 0) startMaxCT(id, now);
         } else {
+            // Switch to 2nd Trait
+            state.secondTraitId = id;
             switchTrait(id, now);
             state.phase = PHASES.D;
         }
         return;
     }
 
-    // PHASE D: Switched and Locked.
+    // PHASE D: Switched and Locked to 2nd Trait.
     if (state.phase === PHASES.D) {
-        if (state.activeTraitId === id && trait.remaining <= 0) {
+        if (state.secondTraitId === id && trait.remaining <= 0) {
             startMaxCT(id, now);
         }
     }
@@ -246,20 +248,20 @@ function handleTraitClick(id) {
 
 function startMaxCT(id, now) {
     const s = state.traits[id];
-    if (!state.firstTraitMaxStartAt) state.firstTraitMaxStartAt = now;
 
-    // Stop previous
-    if (state.activeTraitId) state.traits[state.activeTraitId].isCounting = false;
+    // Stop ALL others just in case
+    TRAITS.forEach(t => {
+        if (t.id !== id) state.traits[t.id].isCounting = false;
+    });
 
     s.status = 'max';
     s.remaining = s.maxCT;
     s.startedAt = now;
     s.isCounting = true;
-    state.activeTraitId = id;
 }
 
 function switchTrait(targetId, now) {
-    const currentId = state.activeTraitId;
+    const currentId = state.firstTraitId;
     const sCurr = state.traits[currentId];
     const sTarget = state.traits[targetId];
 
@@ -268,13 +270,15 @@ function switchTrait(targetId, now) {
     const ratio = Math.min(1.0, elapsedSinceStart / sCurr.ratioBase);
     const newRem = Math.max(0, sTarget.maxCT * (1 - ratio));
 
+    // Freeze 1st Trait
+    const diff = (now - sCurr.startedAt) / 1000;
+    sCurr.remaining = Math.max(0, sCurr.remaining - diff);
     sCurr.isCounting = false;
 
     sTarget.status = 'max';
     sTarget.remaining = newRem;
     sTarget.isCounting = true;
     sTarget.startedAt = now;
-    state.activeTraitId = targetId;
 }
 
 // ===================================
@@ -312,9 +316,9 @@ function update(now) {
 
     state.matchTime = Math.floor((now - state.gameStartedAt) / 1000);
 
-    // Trump card unlock logic (B -> C)
-    if (state.phase === PHASES.B && state.firstTraitMaxStartAt) {
-        if ((now - state.firstTraitMaxStartAt) / 1000 >= 120) state.phase = PHASES.C;
+    // Trump card unlock logic (120s from match start)
+    if (state.phase === PHASES.A || state.phase === PHASES.B) {
+        if (state.matchTime >= 120) state.phase = PHASES.C;
     }
 
     // Traits update
@@ -406,7 +410,7 @@ function render(now) {
         timerText.innerText = Math.ceil(v);
 
         // Styling classes
-        el.classList.remove('disabled', 'state-initial', 'state-active', 'state-ready', 'warning', 'danger', 'selecting');
+        el.classList.remove('disabled', 'state-initial', 'state-active', 'state-ready', 'warning', 'danger', 'selecting', 'frozen');
 
         if (state.ui === UI_MODE.IDLE || state.ui === UI_MODE.WAITING) {
             el.classList.add('disabled');
@@ -418,8 +422,7 @@ function render(now) {
                     else el.classList.add('state-initial');
                     break;
                 case PHASES.B:
-                case PHASES.D:
-                    if (state.activeTraitId === t.id) {
+                    if (state.firstTraitId === t.id) {
                         el.classList.add('state-active');
                         if (v <= 0) el.classList.add('state-ready');
                         else if (v <= 5) el.classList.add('danger');
@@ -429,11 +432,23 @@ function render(now) {
                     }
                     break;
                 case PHASES.C:
-                    if (state.activeTraitId === t.id) {
+                    if (state.firstTraitId === t.id) {
                         el.classList.add('state-active');
                         if (v <= 0) el.classList.add('state-ready');
                     } else {
                         el.classList.add('selecting');
+                    }
+                    break;
+                case PHASES.D:
+                    if (state.secondTraitId === t.id) {
+                        el.classList.add('state-active');
+                        if (v <= 0) el.classList.add('state-ready');
+                        else if (v <= 5) el.classList.add('danger');
+                        else if (v <= 10) el.classList.add('warning');
+                    } else if (state.firstTraitId === t.id) {
+                        el.classList.add('frozen');
+                    } else {
+                        el.classList.add('disabled'); // Half transparent
                     }
                     break;
             }
@@ -453,8 +468,8 @@ function render(now) {
         tt.innerText = '使用可能！他特質を選択で切り替え';
     } else {
         tc.classList.add('disabled');
-        if (state.firstTraitMaxStartAt && state.phase === PHASES.B) {
-            const r = Math.max(0, 120 - (now - state.firstTraitMaxStartAt) / 1000);
+        if (state.gameStartedAt) {
+            const r = Math.max(0, 120 - state.matchTime);
             tt.innerText = `有効まで: ${Math.ceil(r)}秒`;
         } else {
             tt.innerText = '有効まで: 120秒';

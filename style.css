@@ -243,9 +243,18 @@ body {
     animation: selector-glow 1s infinite alternate;
 }
 
-.trait-card.disabled {
-    opacity: 0.15;
-    filter: grayscale(1);
+.trait-card.disabled,
+.trait-half.disabled {
+    opacity: 0.2;
+    filter: grayscale(0.8);
+    pointer-events: none;
+}
+
+.trait-card.frozen,
+.trait-half.frozen {
+    border-color: var(--text-dim);
+    background: rgba(148, 163, 184, 0.05);
+    opacity: 0.6;
     pointer-events: none;
 }
 
@@ -311,10 +320,6 @@ body {
     border: 2px dashed var(--accent-purple);
 }
 
-.trait-half.disabled {
-    opacity: 0.2;
-    pointer-events: none;
-}
 
 /* Trump Card StatusBar */
 .trump-card {

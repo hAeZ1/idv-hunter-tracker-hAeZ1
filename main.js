@@ -222,7 +222,8 @@ function handleTraitClick(id) {
         if (trait.status === 'initial' && trait.remaining <= 0) {
             state.firstTraitId = id;
             startMaxCT(id, now);
-            state.phase = PHASES.B;
+            // If already 120s passed, move to Phase C immediately
+            state.phase = (state.matchTime >= 120) ? PHASES.C : PHASES.B;
         }
         return;
     }
@@ -347,7 +348,7 @@ function update(now) {
     state.matchTime = Math.floor((now - state.gameStartedAt) / 1000);
 
     // Trump card unlock logic (120s from match start)
-    if (state.phase === PHASES.A || state.phase === PHASES.B) {
+    if (state.phase === PHASES.B) {
         if (state.matchTime >= 120) state.phase = PHASES.C;
     }
 

@@ -139,6 +139,8 @@ function onPrimaryButtonClick() {
     if (state.ui === UI_MODE.IDLE) {
         state.ui = UI_MODE.WAITING;
         state.startBtnTs = now;
+        document.getElementById('countdown-overlay').classList.remove('hidden');
+        updateButtonVisuals('WAITING', '画面が割れる瞬間にタップ', 'waiting');
     } else if (state.ui === UI_MODE.WAITING) {
         startMatch();
     } else if (state.ui === UI_MODE.GAME) {
@@ -153,6 +155,7 @@ function startMatch() {
     state.ui = UI_MODE.GAME;
     state.gameStartedAt = now;
     state.phase = PHASES.A;
+    document.getElementById('countdown-overlay').classList.add('hidden');
 
     // Auto-start everyone in Phase A (Initial CT)
     TRAITS.forEach(t => {

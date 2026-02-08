@@ -184,6 +184,7 @@ body {
     justify-content: center;
     border-radius: 14px;
     z-index: 100;
+    pointer-events: none;
 }
 
 .countdown-overlay span {

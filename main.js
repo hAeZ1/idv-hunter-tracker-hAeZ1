@@ -78,6 +78,7 @@ function resetTool() {
     state.secondTraitId = null;
     state.matchTime = 0;
     setupData();
+    updateButtonVisuals('START', 'キャラが見えたらタップ', '');
     updateUIColors();
 }
 
@@ -262,22 +263,42 @@ function startMaxCT(id, now) {
 
 function switchTrait(targetId, now) {
     const currentId = state.firstTraitId;
+    if (!currentId) {
+        // Fallback: If no first trait was selected, new one starts at 0 or maxCT?
+        // In IDV, if you haven't used your trait for 120s, it's ready.
+        const sTarget = state.traits[targetId];
+        sTarget.status = 'max';
+        sTarget.remaining = 0;
+        sTarget.isCounting = false;
+        return;
+    }
+
     const sCurr = state.traits[currentId];
     const sTarget = state.traits[targetId];
 
-    // Proportion calculation: (New) = (NewMax) * (1 - Elapsed/RatioBase)
-    const elapsedSinceStart = (now - sCurr.startedAt) / 1000;
-    const ratio = Math.min(1.0, elapsedSinceStart / sCurr.ratioBase);
-    const newRem = Math.max(0, sTarget.maxCT * (1 - ratio));
+    // Specification:
+    // Ratio = (1st Remaining) / (1st MaxCT)
+    // 2nd Remaining = (2nd MaxCT) * Ratio
 
-    // Freeze 1st Trait
-    const diff = (now - sCurr.startedAt) / 1000;
-    sCurr.remaining = Math.max(0, sCurr.remaining - diff);
+    let currentRemaining;
+    if (sCurr.isCounting) {
+        const elapsed = (now - sCurr.startedAt) / 1000;
+        const total = (sCurr.status === 'initial') ? TRAITS.find(t => t.id === currentId).initialCT : sCurr.remaining;
+        currentRemaining = Math.max(0, total - elapsed);
+    } else {
+        currentRemaining = sCurr.remaining;
+    }
+
+    const progressRatio = currentRemaining / sCurr.maxCT;
+    const newRem = sTarget.maxCT * progressRatio;
+
+    // Freeze 1st Trait at its current value
+    sCurr.remaining = currentRemaining;
     sCurr.isCounting = false;
 
     sTarget.status = 'max';
     sTarget.remaining = newRem;
-    sTarget.isCounting = true;
+    sTarget.isCounting = newRem > 0;
     sTarget.startedAt = now;
 }
 
@@ -403,9 +424,9 @@ function render(now) {
             const seed = (s.status === 'initial') ? t.initialCT : s.remaining;
             v = Math.max(0, seed - (now - s.startedAt) / 1000);
         } else {
-            if (s.status === 'initial') v = t.initialCT;
-            else if (s.remaining <= 0) v = 0;
-            else v = s.remaining; // Switched but not active
+            if (s.remaining <= 0) v = 0;
+            else if (s.status === 'initial') v = t.initialCT;
+            else v = s.remaining; // Frozen or switched
         }
         timerText.innerText = Math.ceil(v);
 

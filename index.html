@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Identity V Hunter Skill Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+JP:wght@500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-shell">
+        <header class="status-header">
+            <!-- 左上: 暗号機封鎖 -->
+            <div class="header-card block-timer" id="block-release-container">
+                <div class="card-label">暗号機封鎖</div>
+                <div class="card-main">
+                    <span class="lock-icon">🔒</span>
+                    <span class="timer-value" id="block-release-value">30</span>
+                </div>
+            </div>
+
+            <!-- 右上: 対戦時間 -->
+            <div class="header-card match-timer">
+                <div class="card-label">対戦時間</div>
+                <div class="card-main">
+                    <span id="match-time-value">0:00</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="top-controls">
+            <!-- メインボタン（スタート/通電/リスタート） -->
+            <button class="primary-btn" id="main-button">
+                <div class="btn-content">
+                    <span class="main-text" id="button-text">START</span>
+                    <span class="sub-text" id="button-subtext">画面が割れる瞬間にタップ</span>
+                </div>
+                <div class="btn-progress" id="btn-progress"></div>
+            </button>
+            <div class="countdown-overlay hidden" id="countdown-overlay">
+                <span id="countdown-number">5</span>
+            </div>
+        </section>
+
+        <!-- 通電後タイマー -->
+        <div class="powered-strip">
+            <div class="powered-card disabled" id="detention-card">
+                <div class="p-label">引き止める</div>
+                <div class="p-timer" id="detention-value">120</div>
+            </div>
+            <div class="powered-card disabled" id="no-exit-card">
+                <div class="p-label">幽閉の恐怖</div>
+                <div class="p-timer" id="no-exit-value">20</div>
+            </div>
+        </div>
+
+        <main class="main-content">
+            <!-- 特質グリッド -->
+            <div class="traits-container" id="traits-container">
+                <!-- JSで動的生成 -->
+            </div>
+
+            <!-- 裏向きカードステータス -->
+            <div class="trump-status-bar" id="trump-card-area">
+                <div class="trump-card disabled" id="trump-card">
+                    <div class="trump-info">
+                        <span class="trump-icon">🃏</span>
+                        <div class="trump-texts">
+                            <span class="trump-label">裏向きカード</span>
+                            <span class="trump-timer" id="trump-timer">有効まで: 120秒</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="bottom-controls">
+            <div class="eco-timers">
+                <div class="eco-item" id="burning-card">
+                    <span class="eco-icon">🔥</span>
+                    <div class="eco-data">
+                        <span class="eco-label">焼入れ</span>
+                        <span class="eco-val" id="burning-value">50</span>
+                    </div>
+                </div>
+                <div class="eco-item" id="arrogance-card">
+                    <span class="eco-icon">👑</span>
+                    <div class="eco-data">
+                        <span class="eco-label">傲慢</span>
+                        <span class="eco-val" id="arrogance-value">52</span>
+                    </div>
+                </div>
+                <div class="eco-item" id="decode-card">
+                    <span class="eco-icon">⚡</span>
+                    <div class="eco-data">
+                        <span class="eco-label">解読加速</span>
+                        <span class="eco-val" id="decode-value">202</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 作成者クレジット -->
+            <div class="creator-credit">
+                <span>Created by</span>
+                <span class="creator-name">hAeZ1</span>
+            </div>
+        </footer>
+    </div>
+    <script src="main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,470 @@
+/* ===================================
+   Identity V Tracker - Final Polish
+   =================================== */
+
+:root {
+    --bg-dark: #070a0e;
+    --bg-card: rgba(18, 25, 35, 0.85);
+    --accent-blue: #0088ff;
+    --accent-gold: #ffcc00;
+    --accent-red: #ff3344;
+    --accent-green: #00ff88;
+    --accent-purple: #cc66ff;
+    --text-main: #f0f4f8;
+    --text-dim: #94a3b8;
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: radial-gradient(circle at top, #161c2b 0%, var(--bg-dark) 100%);
+    color: var(--text-main);
+    font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+}
+
+.app-shell {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    gap: 10px;
+}
+
+/* Header Area */
+.status-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.header-card {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px;
+    text-align: center;
+}
+
+.card-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 2px;
+}
+
+.card-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    font-weight: 800;
+    font-size: 1.5rem;
+}
+
+.block-timer.active .timer-value {
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px rgba(0, 136, 255, 0.4);
+}
+
+.block-timer.ready .timer-value {
+    color: var(--accent-green);
+}
+
+/* Powered Emphasized Style */
+.powered-strip {
+    display: flex;
+    gap: 8px;
+}
+
+.powered-card {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    padding: 10px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.4s ease;
+}
+
+.powered-card.active {
+    background: rgba(204, 102, 255, 0.2);
+    border-color: var(--accent-purple);
+    box-shadow: 0 0 25px rgba(204, 102, 255, 0.3);
+    transform: scale(1.02);
+}
+
+.powered-card.disabled {
+    opacity: 0.15;
+}
+
+.p-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.p-timer {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.active .p-label {
+    color: var(--accent-purple);
+}
+
+.active .p-timer {
+    color: var(--accent-purple);
+    text-shadow: 0 0 15px rgba(204, 102, 255, 0.6);
+}
+
+/* Main Button Area */
+.top-controls {
+    position: relative;
+}
+
+.primary-btn {
+    width: 100%;
+    height: 75px;
+    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+    border: 2px solid var(--accent-blue);
+    border-radius: 14px;
+    color: var(--text-main);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.primary-btn.waiting {
+    border-color: var(--accent-gold);
+}
+
+.primary-btn.powered {
+    border-color: var(--accent-purple);
+}
+
+.primary-btn.restart {
+    border-color: var(--text-dim);
+    opacity: 0.8;
+}
+
+.main-text {
+    font-size: 1.6rem;
+    font-weight: 800;
+}
+
+.sub-text {
+    font-size: 0.6rem;
+    font-weight: 500;
+    opacity: 0.6;
+}
+
+.countdown-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 204, 0, 0.95);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 14px;
+    z-index: 100;
+}
+
+.countdown-overlay span {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #000;
+}
+
+/* Traits Grid */
+.traits-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.trait-card,
+.trait-group {
+    min-height: 100px;
+}
+
+.trait-card {
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.trait-card.size-large {
+    min-height: 140px;
+}
+
+.trait-card.size-large .trait-timer {
+    font-size: 3.8rem;
+}
+
+.trait-card.state-active {
+    border-color: var(--accent-blue);
+    background: rgba(0, 136, 255, 0.12);
+    z-index: 2;
+}
+
+.trait-card.state-ready {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.25);
+}
+
+.trait-card.state-ready .trait-timer {
+    color: var(--accent-green);
+}
+
+.trait-card.selecting {
+    border: 2px dashed var(--accent-purple);
+    animation: selector-glow 1s infinite alternate;
+}
+
+.trait-card.disabled {
+    opacity: 0.15;
+    filter: grayscale(1);
+    pointer-events: none;
+}
+
+.trait-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-dim);
+}
+
+.trait-timer {
+    font-size: 3rem;
+    font-weight: 800;
+    line-height: 0.9;
+    text-align: right;
+}
+
+.trait-icon {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    font-size: 2.8rem;
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.trait-card.warning .trait-timer {
+    color: var(--accent-gold);
+}
+
+.trait-card.danger .trait-timer {
+    color: var(--accent-red);
+    animation: danger-shake 0.2s infinite;
+}
+
+/* Group Logic */
+.trait-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.trait-half {
+    flex: 1;
+    background: var(--bg-card);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+}
+
+.trait-half .trait-timer {
+    font-size: 1.6rem;
+}
+
+.trait-half.state-ready .trait-timer {
+    color: var(--accent-green);
+}
+
+.trait-half.selecting {
+    border: 2px dashed var(--accent-purple);
+}
+
+.trait-half.disabled {
+    opacity: 0.2;
+    pointer-events: none;
+}
+
+/* Trump Card StatusBar */
+.trump-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed var(--glass-border);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+}
+
+.trump-card.available {
+    background: rgba(204, 102, 255, 0.15);
+    border: 1px solid var(--accent-purple);
+    box-shadow: 0 0 20px rgba(204, 102, 255, 0.2);
+}
+
+.trump-icon {
+    font-size: 2rem;
+}
+
+.trump-label {
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.available .trump-label {
+    color: var(--accent-purple);
+}
+
+.trump-timer {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+}
+
+/* Footer Area: Persona Timers */
+.eco-timers {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.eco-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 10px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+}
+
+.eco-icon {
+    font-size: 1.3rem;
+    margin-bottom: 2px;
+}
+
+.eco-label {
+    font-size: 0.6rem;
+    color: var(--text-dim);
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.eco-val {
+    font-size: 1.4rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.eco-item.active {
+    border-color: var(--accent-blue);
+}
+
+.eco-item.warning {
+    border-color: var(--accent-gold);
+}
+
+.eco-item.ready {
+    border-color: var(--accent-green);
+    box-shadow: 0 0 15px rgba(0, 255, 136, 0.2);
+}
+
+.eco-item.ready .eco-val {
+    color: var(--accent-green);
+}
+
+/* Animations */
+@keyframes selector-glow {
+    from {
+        box-shadow: 0 0 8px rgba(204, 102, 255, 0.3);
+    }
+
+    to {
+        box-shadow: 0 0 20px rgba(204, 102, 255, 0.6);
+        border-color: var(--accent-purple);
+    }
+}
+
+@keyframes danger-shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(1px);
+    }
+
+    75% {
+        transform: translateX(-1px);
+    }
+}
+
+@keyframes blinking {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.4;
+    }
+}
+
+.hidden {
+    display: none !important;
+}
+
+.blinking {
+    animation: blinking 0.5s infinite;
+}
+
+/* Creator Credit */
+.creator-credit {
+    margin-top: 20px;
+    padding-bottom: 10px;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    letter-spacing: 0.15em;
+    opacity: 0.7;
+    font-weight: 500;
+}
+
+.creator-name {
+    font-weight: 800;
+    color: var(--accent-blue);
+    margin-left: 6px;
+    text-shadow: 0 0 10px rgba(0, 136, 255, 0.4);
+}

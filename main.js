@@ -37,6 +37,7 @@ const UI_MODE = { IDLE: 'idle', WAITING: 'waiting', GAME: 'game', POWERED: 'powe
 // CORE STATE
 // ===================================
 let state = {
+    initialized: false,
     ui: UI_MODE.IDLE,
     phase: PHASES.A,
     gameStartedAt: null,
@@ -55,6 +56,14 @@ let state = {
 // ENGINE
 // ===================================
 function init() {
+    if (state.initialized) return;
+    state.initialized = true;
+
+    if (!document.getElementById('traits-container')) {
+        state.initialized = false;
+        return;
+    }
+
     setupData();
     renderTraitGrid();
     bindEvents();
@@ -502,4 +511,9 @@ function updateUIColors() {
     // Initial UI reset handled by render in Idaho's next frame
 }
 
-init();
+// Initialize safely
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
